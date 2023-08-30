@@ -1,0 +1,75 @@
+version: "3.8"
+services:
+  #PHP Service
+  mediusware:
+    build:
+      args:
+        user: mediusware
+        uid: 1000
+      context: .
+      dockerfile: .docker/Dockerfile
+    image: mediusware
+    restart: unless-stopped
+    working_dir: /var/www/
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    volumes:
+      - ./:/var/www
+      - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - mediusware_network
+
+  #MySQL Service
+  mediusware_db:
+    image: mysql:8.0
+    container_name: mediusware_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - mediusware_mysql_data:/var/lib/mysql
+    networks:
+      - mediusware_network
+  #Nginx Service
+  mediusware_nginx:
+    image: nginx:alpine
+    container_name: mediusware_nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8030:80"
+    volumes:
+      - ./:/var/www
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - mediusware_network
+  # phpmyadmin service
+  mediusware_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    container_name: mediusware_phpmyadmin
+    depends_on:
+      - mediusware_db
+    ports:
+      - "4030:80"
+    environment:
+      PMA_HOST: mediusware_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - mediusware_network
+
+#Docker Networks
+networks:
+  mediusware_network:
+    driver: bridge
+
+#Volumes
+volumes:
+  mediusware_mysql_data:
