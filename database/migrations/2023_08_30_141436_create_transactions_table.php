@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->string('transaction_type');
-            $table->decimal('amount', 10, 2);
-            $table->decimal('fee', 10, 2)->default(0);
+            $table->decimal('amount', 10, 3);
+            $table->decimal('fee', 10, 3)->default(0);
             $table->timestamp('date')->useCurrent();
             $table->timestamps();
         });

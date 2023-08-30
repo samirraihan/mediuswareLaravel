@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('account_type');
-            $table->decimal('balance', 10, 2)->default(0);
+            $table->decimal('balance', 10, 3)->default(0);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
